@@ -66,8 +66,8 @@ if ($.isNode()) {
             if (!$.canHelp) {
                 break;
             }
-            // await help(shareCodes[j]);
-            // await $.wait(1000);
+            await help(shareCodes[j]);
+            await $.wait(1000);
         }
     }
     console.log(`\===执行任务抽奖===\n`);
