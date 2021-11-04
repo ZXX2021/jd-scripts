@@ -123,7 +123,7 @@ async function help(sharecode) {
             case 30010:
                 console.log('助力已满！');
                 break;
-            case 110:
+            case 30011:
                 console.log('助力次数已用完！');
                 $.canHelp = false;
                 break;
