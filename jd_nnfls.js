@@ -14,7 +14,7 @@ const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 const CryptoJS = $.isNode() ? require('crypto-js') : CryptoJS;
 let cookiesArr = [];
 let shareCodes = [];
-let authorCodes = [];
+let rcsArr = [];
 let coin = 0;
 if ($.isNode()) {
     Object.keys(jdCookieNode).forEach((item) => {
@@ -57,13 +57,17 @@ if ($.isNode()) {
     await getShareCode('nnfls.json', author, 3, true)
     shareCodes = [...new Set([...shareCodes, ...($.shareCode || [])])];
     if (shareCodes.length > 0) {
-        console.log(`\n开始互助\n`);
+        console.log(`\n*********开始互助**********\n`);
     }
     for (let i = 0; i < cookiesArr.length; i++) {
         $.cookie = cookiesArr[i];
         $.canHelp = true;
         $.UserName = decodeURIComponent($.cookie.match(/pt_pin=([^; ]+)(?=;?)/) && $.cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1]);
         console.log(`====开始账号${$.UserName}===助力`)
+        if (rcsArr.includes($.UserName) > 0) {
+            console.log("不让助力，休息会！");
+            break;
+        }
         for (let j = 0; j < shareCodes.length; j++) {
             if (!$.canHelp) {
                 break;
@@ -72,11 +76,15 @@ if ($.isNode()) {
             await $.wait(1000);
         }
     }
-    console.log(`\===执行任务抽奖===\n`);
+    console.log(`\n********执行任务抽奖**********\n`);
     for (let i = 0; i < cookiesArr.length; i++) {
         $.cookie = cookiesArr[i];
         $.UserName = decodeURIComponent($.cookie.match(/pt_pin=([^; ]+)(?=;?)/) && $.cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1]);
         console.log(`====开始账号${$.UserName}===`)
+        if (rcsArr.includes($.UserName) > 0) {
+            console.log("不让做任务，休息会！");
+            continue;
+        }
         await drawUserTask();
     }
 
@@ -133,6 +141,11 @@ async function help(sharecode) {
                 break;
             case 30009:
                 console.log('已助力过！');
+                break;
+            case 60009:
+                console.log('不让助力，先休息会！');
+                rcsArr.push($.UserName);
+                $.canHelp = false;
                 break;
             case 0:
                 console.log('助力成功');
@@ -209,6 +222,11 @@ async function UserSignNew() {
     let params = { source: '' };
     let res = await api(fn, stk, params);
     if (res) {
+        if (res.retCode == 60009) {
+            console.log('风控用户，不让玩')
+            rcsArr.push($.UserName);
+            return res;
+        }
         console.log('签到', res.retCode == 0 ? "success" : "fail")
         console.log('助力码', res.data.token)
         shareCodes.push(res.data.token);
